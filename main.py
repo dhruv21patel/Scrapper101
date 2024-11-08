@@ -2,14 +2,15 @@ import httpx
 from selectolax.parser import HTMLParser
 import time
 from urllib.parse import urljoin
-from dataclasses import asdict,dataclass
+from dataclasses import asdict,dataclass,fields,field
 import re
+import json,csv
 
 
 @dataclass
 class Item:
-    name : str | None
-    price : str| None
+    Name : str | None
+    Price : str| None
     Discount : str | None
     Color : str | None
     Sizes : list | None
@@ -33,12 +34,6 @@ def getHtml(baseurl,**kwargs):
     return html
 
 
-def getsaleprice(product,identifier):
-    try:
-       return product.css_first(identifier).attrs.get("content")
-    except AttributeError:
-        return None
-
 def getproduct(product,identifier):
     try:
         return product.css_first(identifier).text()
@@ -61,15 +56,29 @@ def getproductinformtion(htmlpage):
                 allsizes.append(re.sub(r"[\s\\n]", "", pro))
         
         newitem = Item(
-            name = re.sub(r"[\s\\n]", "",htmlpage.css_first(".product-name").text()),
-            price = re.sub(r"[\s\\n]", "", htmlpage.css_first(".price-standard").text()),
+            Name = re.sub(r"[\s\\n]", "",htmlpage.css_first(".product-name").text()),
+            Price = re.sub(r"[\s\\n]", "", htmlpage.css_first(".price-standard").text()),
             Discount = re.sub(r"[\s\\n]", "", htmlpage.css_first(".price-sales").text()),
             Color = re.sub(r"[\s\\n]", "", htmlpage.css_first(".selected-value").text()),
             Sizes = allsizes,
         )
 
-        return newitem
+        return asdict(newitem)
     except AttributeError: return None
+
+def convert_to_JSON(product):
+    with open("products.json","w",encoding="utf-8") as f:
+        json.dump(product,f,ensure_ascii=False,indent=4)
+    print("Saved to JSON")
+
+def convert_to_csv(product):
+    fields_names = [field.name for field in fields(Item)]
+    with open("products.csv","w") as f:
+        if(product != "null"):
+            writer = csv.DictWriter(f,fields_names)
+            writer.writeheader()
+            writer.writerows(product)
+    print("Saved to CSV")
 
 def parser(html):
     try:
@@ -79,8 +88,11 @@ def parser(html):
             product_link = getproductinformationlink(product,".product-tile .product-tile-name a.name-link")
             htmlpage = getHtml(product_link)
             newitem = getproductinformtion(htmlpage)
-            allproducts.append(newitem)
-            print(asdict(newitem))
+            if(newitem != None and newitem != "null"):
+                allproducts.append(newitem)
+            print("item added")
+        convert_to_JSON(allproducts)
+        convert_to_csv(allproducts)    
 
     except httpx.ReadTimeout:
         print("The request timed out. Try again later.")
