@@ -19,19 +19,20 @@
     2. It parses the HTML to extract product details (name, full price, sale price) using CSS selectors.
     3. The scraper handles multiple pages by adjusting pagination URLs.
     4. Extracted product data is printed to the console in a structured format.
-    ### How to Use:
-        # Clone the repository to your local machine:
+
+    How to Use:
+        Clone the repository to your local machine:
             - bash
             - Copy code
             - git clone https://github.com/yourusername/scrapper101.git
 
-        # Install the required dependencies using pip:
+        Install the required dependencies using pip:
             - pip install httpx selectolax
 
-        # Run the script:
+        Run the script:
             - python scrapper101.py
 
-        # Code Breakdown:
+        Code Breakdown:
             - getHtml(baseurl, page)
             - Sends an HTTP GET request to the e-commerce site with headers to mimic a real browser.
             - Handles redirects and raises errors for non-200 responses.
@@ -46,11 +47,11 @@
             - Defines the base URL and loops through multiple pages of the product list.
             - Calls the parser to extract product details for each page.
 
-        # Example Output:
+        Example Output:
             {'name': 'Product 1', 'fullprice': '$50', 'saleprice': '$30'}
             {'name': 'Product 2', 'fullprice': '$60', 'saleprice': '$40'}
             ...
 
-    ## Customization:
+## Customization:
         Modify the url variable in the main() function to scrape other e-commerce websites.
         Update the CSS selectors in the getproduct() and getsaleprice() functions to match the structure of the target site.
